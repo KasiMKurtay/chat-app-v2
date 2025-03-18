@@ -1,0 +1,22 @@
+# Çevresel değişkenler dosyası
+.env
+
+# Node.js modülleri
+node_modules/
+
+# IDE ve editör dosyaları
+.vscode/
+.idea/
+
+# Log dosyaları
+*.log
+
+# İşletim sistemi dosyaları
+.DS_Store
+
+# Derlenmiş dosyalar
+dist/
+build/
+
+# Test sonuçları
+coverage/

@@ -5,14 +5,14 @@ import generateToken from "../utils/generateToken.js"; //Token oluşturmak için
 export const signup = async (req, res) => {
   //Signup işlemini yönetem asenkron fonksiyon tanımlar
   try {
-    const { fullName, userName, password, confirmPassword, gender } = req.body; //Kullanıcı bilgilerini alır, kullanıcının kayıt formunda girdiği verilerdir
+    const { fullName, username, password, confirmPassword, gender } = req.body; //Kullanıcı bilgilerini alır, kullanıcının kayıt formunda girdiği verilerdir
 
     if (password !== confirmPassword) {
       //Şifre ve şifre onayını eşleşip eşleşmediği kontrolü sağlanıyor
       return res.status(400).json({ error: "Passwords do not match" });
     }
 
-    const user = await User.findOne({ userName }); //veritabanında aynı userName'e sahip biri var mı diye kontrol sağlanıyor
+    const user = await User.findOne({ username }); //veritabanında aynı userName'e sahip biri var mı diye kontrol sağlanıyor
 
     if (user) {
       return res.status(400).json({ error: "Username already exists" }); //Eğer aynı id'ye sahip birisi varsa hata mesajı dönüyor
@@ -22,14 +22,14 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, salt); //Kullanıcının şifresini, oluşturulan ssalt ile birlikte hash'ler ve güvenli şekilde saklar
 
-    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${userName}`; //Kullanıcının icnsiyetine göre profil resmi URL'si oluşturur
+    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`; //Kullanıcının icnsiyetine göre profil resmi URL'si oluşturur
 
-    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${userName}`;
+    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
     const newUser = new User({
       //Yeni bir kullanıcı oluşturuyoruz.Nesne'de kullanıcının bilgilerini ve hashlenmiş şifresini içeriyor
       fullName,
-      userName,
+      username,
       password: hashedPassword,
       gender,
       profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
@@ -44,7 +44,7 @@ export const signup = async (req, res) => {
         //Yanıt kaydedilen kullanıcı bilgilerini içerir
         _id: newUser._id,
         fullName: newUser.fullName,
-        userName: newUser.userName,
+        username: newUser.username,
         profilePic: newUser.profilePic,
       });
     } else {
@@ -56,10 +56,40 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = (req, res) => {
-  console.log("loginUser");
+export const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await User.findOne({ username });
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user?.password || ""
+    );
+
+    if (!user || !isPasswordCorrect) {
+      return res.status(400).json({ error: "Invalid username or password" });
+    }
+
+    generateToken(user._id, res);
+
+    res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      username: user.username,
+      profilePic: user.profilePic,
+    });
+  } catch (error) {
+    console.log("Error in login controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 export const logout = (req, res) => {
-  console.log("logoutUser");
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logout controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };

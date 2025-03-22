@@ -22,9 +22,9 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, salt); //Kullanıcının şifresini, oluşturulan ssalt ile birlikte hash'ler ve güvenli şekilde saklar
 
-    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`; //Kullanıcının icnsiyetine göre profil resmi URL'si oluşturur
+    const boyProfilePic = `https://i.pravatar.cc/150?u=${username}`; //Kullanıcının icnsiyetine göre profil resmi URL'si oluşturur
 
-    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
+    const girlProfilePic = `https://i.pravatar.cc/150?u=${username}`;
 
     const newUser = new User({
       //Yeni bir kullanıcı oluşturuyoruz.Nesne'de kullanıcının bilgilerini ve hashlenmiş şifresini içeriyor

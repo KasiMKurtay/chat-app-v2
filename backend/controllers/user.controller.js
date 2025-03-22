@@ -13,7 +13,7 @@ export const getUsersForSideBar = async (req, res) => {
     //Seçilen kullanıcıların şifresi hariç diğer bilgileri döner
 
     //Filtrelenmiş kullanıcı listesini JSON formatında yanıt olarak döner
-    res.status(200).json({ filteredUsers });
+    res.status(200).json( filteredUsers );
   } catch (error) {
     console.error("Error in getUsersForSideBar", error.message);
     res.status(500).json({ error: "Internal Server Error" });

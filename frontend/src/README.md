@@ -1,1 +1,1 @@
-React Router Dom added -- Links fixed
+Avatar image routes fixed -- zustand store added -- also you can view the any chat that you want

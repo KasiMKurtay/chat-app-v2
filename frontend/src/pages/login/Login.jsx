@@ -1,73 +1,81 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import useLogin from "../../hooks/useLogin";
 
 const Login = () => {
-  const [username, setUsername] = useState();
-  //username değerini tutan state, başlangıçta undefined
-  const [password, setPassword] = useState();
-  //password değerini tutan state
+  // Login bileşeni başlatılıyor
 
-  const { loading, login } = useLogin();
-  //useLogin hook'undan Loading ve login çekildi
+  // Username ve password için state'ler tanımlanıyor
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  //Form gönderilidğinde çalışacak fonksiyon
+  const { loading, login } = useLogin(); // useLogin hook'undan login fonksiyonu ve loading durumunu alıyoruz
+
+  // Form gönderildiğinde login fonksiyonu çağrılır
   const handleSubmit = async (e) => {
-    //Sayfa yenilenmesini engeller
-    e.preventDefault();
-    //Giriş fonksiyonunu çağırır, kullanıdı adı ve şifre ile
-    await login(username, password);
+    e.preventDefault(); // Formun default davranışını engelliyoruz
+    await login(username, password); // Login fonksiyonunu çağırıyoruz
   };
+
   return (
-    <div className="flex flex-col items-center justify-center min-w-96 mx-auto ">
+    <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
+      {/* Ana container */}
       <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
-        {/*Sayfa ortasına hizalanmış kapsayıcı div */}
+        {/* Login kartı */}
         <h1 className="text-3xl font-semibold text-center text-gray-300">
           Login
-          <span className="text-blue-500">ChatApp-V2</span>
+          <span className="text-blue-500"> ChatApp</span>
+          {/* Başlık kısmı, ChatApp markasını vurguluyor */}
         </h1>
+
         <form onSubmit={handleSubmit}>
-          {" "}
-          {/*Form yapısı ve submit edildiğinde çalışacak olan fonksiyon */}
+          {/* Formun submit işlemi handleSubmit fonksiyonu tarafından yapılır */}
+
           <div>
             <label className="label p-2">
+              {/* Username için etiket */}
               <span className="text-base label-text">Username</span>
             </label>
             <input
               type="text"
               placeholder="Enter username"
               className="w-full input input-bordered h-10"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              //Kullanıcı adı değiştikçe state güncellenir
+              value={username} // input değerini state ile bağlıyoruz
+              onChange={(e) => setUsername(e.target.value)} // input değiştiğinde state güncellenir
             />
           </div>
+
           <div>
             <label className="label">
+              {/* Password için etiket */}
               <span className="text-base label-text">Password</span>
             </label>
             <input
               type="password"
               placeholder="Enter Password"
               className="w-full input input-bordered h-10"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              //Şifre değiştikçe state güncellenir
+              value={password} // input değerini state ile bağlıyoruz
+              onChange={(e) => setPassword(e.target.value)} // input değiştiğinde state güncellenir
             />
           </div>
+
           <Link
-            to={"/signup"}
+            to="/signup"
             className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
           >
+            {/* Kayıt olma linki */}
             {"Don't"} have an account?
           </Link>
+
           <div>
             <button className="btn btn-block btn-sm mt-2" disabled={loading}>
-              {!loading ? (
-                "Login"
+              {/* Login butonu */}
+              {loading ? (
+                <span className="loading loading-spinner "></span>
               ) : (
-                <span className="loading loading-spinner"></span>
+                "Login"
               )}
+              {/* Eğer yükleniyorsa loading spinner'ı göster */}
             </button>
           </div>
         </form>

@@ -1,35 +1,37 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const useLogout = () => {
-  const [loading, setLoading] = useState(false);
-  //Çıkış işlemi yapılırken kullanıcıya "yükleniyor" göstermek için kullanılacak başlangıçta false
-  const { setAuthUser } = useAuthContext();
-  //Bu fonksiyon kullanıcı bilgilerini null yaparak, oturum kapandıktan sonra uygulamanın geri kalanında kullanıcı bilgilerini sıfırlama yarar
+  // useLogout custom hook'unu oluşturuyoruz
+  const [loading, setLoading] = useState(false); // loading state'i oluşturuyoruz, başlangıçta false
+  const { setAuthUser } = useAuthContext(); // AuthContext'ten setAuthUser fonksiyonunu alıyoruz
 
   const logout = async () => {
-    setLoading(true); //Çıkış işlemi başladığında yükleniyor durumu başlatır
+    // logout fonksiyonunu oluşturuyoruz
+    setLoading(true); // Yükleniyor durumuna geçiyoruz
     try {
       const res = await fetch("/api/auth/logout", {
-        //sunucuya POST isteği gönderiyoruz.
-        method: "POST", //Kullanıcıya çıkış yaptırmka için backend API'ına yapılır
-        headers: { "Content-Type": "application/json" },
+        // API'ye logout isteği gönderiyoruz
+        method: "POST", // POST isteği yapıyoruz
+        headers: { "Content-Type": "application/json" }, // JSON formatında veri gönderdiğimizi belirtiyoruz
       });
-      const data = await res.json(); //Gelen yanıtı JSON formatında işlenir
+      const data = await res.json(); // API'den gelen yanıtı JSON formatında alıyoruz
       if (data.error) {
-        //Eğer API'dan hata dönerse
-        throw new Error(data.error); //Hata fırlatırı
+        // Eğer hata varsa
+        throw new Error(data.error); // Hata mesajını fırlatıyoruz
       }
-      localStorage.removeItem("chat-user"); //Kullanıcı çıkışı yaptıktan sonra, tarayıcıda saklanan kullanıcı verisi silinir
-      setAuthUser(null); //Kullanıcı bilgileri sıfırlanır, yani kullanıcı çıkış işlemini gerçekleştirmiş olur
+
+      localStorage.removeItem("chat-user"); // LocalStorage'dan kullanıcı bilgisini siliyoruz
+      setAuthUser(null); // AuthContext'teki setAuthUser ile kullanıcıyı null yapıyoruz (çıkış yapmış oluyoruz)
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message); // Hata durumunda toast ile hata mesajı gösteriyoruz
     } finally {
-      setLoading(false);
+      setLoading(false); // İşlem bitince loading durumunu false yapıyoruz
     }
   };
-  return { loading, logout }; //loading ve logout fonksiyonunu dışarı geri döndürüyoruz, bu sayede bu custom hook'u kullanan component'larda hem loading hem logout kullanılabilir
+
+  return { loading, logout }; // loading durumunu ve logout fonksiyonunu dışa aktarıyoruz
 };
 
 export default useLogout;

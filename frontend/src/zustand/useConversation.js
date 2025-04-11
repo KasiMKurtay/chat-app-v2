@@ -1,10 +1,12 @@
-import { create } from "zustand";
+import { create } from "zustand"; 
 
 const useConversation = create((set) => ({
-	selectedConversation: null,
-	setSelectedConversation: (selectedConversation) => set({ selectedConversation }),
-	messages: [],
-	setMessages: (messages) => set({ messages }),
+  // 'useConversation' adında bir store oluşturulur ve 'set' fonksiyonu kullanılarak store'daki veriler güncellenebilir.
+  selectedConversation: null, // Başlangıçta, seçilen konuşma 'null' olarak ayarlanır.
+  setSelectedConversation: (selectedConversation) =>
+    set({ selectedConversation }), // Seçilen konuşmayı güncelleyen bir fonksiyon.
+  messages: [], // Başlangıçta, mesajlar boş bir dizi olarak ayarlanır.
+  setMessages: (messages) => set({ messages }), // Mesajları güncelleyen bir fonksiyon.
 }));
 
-export default useConversation;
+export default useConversation; 

@@ -1,21 +1,19 @@
 import User from "../models/user.model.js";
 
-export const getUsersForSideBar = async (req, res) => {
+// Sidebar'da (sol menüde) gösterilecek kullanıcıları getirir
+export const getUsersForSidebar = async (req, res) => {
   try {
-    const loggedInUserId = req.user._id; //req.user bilgisinden oturum açmış kullanıcının kimliğini (_id) alır. Bu bilgi, protectRouter tarafından eklenir
+    const loggedInUserId = req.user._id; // Giriş yapmış olan kullanıcının ID'sini alır
 
-    //Bu değişken sorgu sonucunda dönen kullanıcı listesini içerir
+    // Giriş yapmış kullanıcı haricindeki tüm kullanıcıları bulur
+    // ".select('-password')" => şifre bilgisini dışarıda bırakır
     const filteredUsers = await User.find({
-      //Veritabanından id alanı loggedInUserId'ye eşit olmayan tüm kullanıları bulur
       _id: { $ne: loggedInUserId },
-      //Yani giriş yapmamış kullanıcı hariç tüm kullanıclar seçilir
     }).select("-password");
-    //Seçilen kullanıcıların şifresi hariç diğer bilgileri döner
 
-    //Filtrelenmiş kullanıcı listesini JSON formatında yanıt olarak döner
-    res.status(200).json( filteredUsers );
+    res.status(200).json(filteredUsers); // Kullanıcı listesini frontend'e gönderir
   } catch (error) {
-    console.error("Error in getUsersForSideBar", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in getUsersForSidebar: ", error.message); // Hata oluşursa terminale yazdırır
+    res.status(500).json({ error: "Internal server error" }); // Sunucu hatası durumunda mesaj döner
   }
 };

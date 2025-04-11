@@ -1,27 +1,33 @@
-import React from "react";
-
 const GenderCheckbox = ({ onCheckboxChange, selectedGender }) => {
+  // GenderCheckbox bileşeni, selectedGender ve onCheckboxChange props'ları alır
+
   return (
-    <div className="flex"> {/*Checkbox'lar yataya dizildi */}
-      <div className="form-control"> {/*Erkek Checkbox'ını saran div */}
+    <div className="flex">
+      {/* İki kutuyu yatayda göstermek için flex kullanılıyor */}
+
+      <div className="form-control">
+        {/* Male seçeneği */}
         <label
           className={`label gap-2 cursor-pointer ${
-            selectedGender === "male" ? "selectedd" : "" //Eğer "male" seçiliyse ek CSS sınıfı eklenir
-          }`}
+            selectedGender === "male" ? "selected" : ""
+          } `}
         >
           <span className="label-text">Male</span>
           <input
             type="checkbox"
             className="checkbox border-slate-900"
-            checked={selectedGender === "male"} //Seçili ecinsiyet "male" ise checkbox işareti eklenir
-            onChange={() => onCheckboxChange("male")} //Tıklandığında erkek olarak cinsiyet ayarlanır
+            checked={selectedGender === "male"}
+            // Eğer selectedGender 'male' ise, checkbox işaretli olacak
+            onChange={() => onCheckboxChange("male")}
+            // Checkbox değiştiğinde, onCheckboxChange fonksiyonu çağrılır ve 'male' değeri gönderilir
           />
         </label>
       </div>
       <div className="form-control">
+        {/* Female seçeneği */}
         <label
-          className={`label gap-2 cursor-pointer ${
-            selectedGender === "female" ? "selectedd" : ""
+          className={`label gap-2 cursor-pointer  ${
+            selectedGender === "female" ? "selected" : ""
           }`}
         >
           <span className="label-text">Female</span>
@@ -29,12 +35,13 @@ const GenderCheckbox = ({ onCheckboxChange, selectedGender }) => {
             type="checkbox"
             className="checkbox border-slate-900"
             checked={selectedGender === "female"}
+            // Eğer selectedGender 'female' ise, checkbox işaretli olacak
             onChange={() => onCheckboxChange("female")}
+            // Checkbox değiştiğinde, onCheckboxChange fonksiyonu çağrılır ve 'female' değeri gönderilir
           />
         </label>
       </div>
     </div>
   );
 };
-
 export default GenderCheckbox;

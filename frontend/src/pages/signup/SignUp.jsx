@@ -1,117 +1,132 @@
-import React, { useState } from "react";
-import GenderCheckbox from "./GenderCheckbox";
 import { Link } from "react-router-dom";
+import GenderCheckbox from "./GenderCheckbox";
+import { useState } from "react";
 import useSignup from "../../hooks/useSignup";
 
 const SignUp = () => {
-  //fonksiyonel bileşen tanımladık
   const [inputs, setInputs] = useState({
-    //Form verilerini tutmak için state
-    fullName: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    gender: "",
+    fullName: "", // Kullanıcının tam adı.
+    username: "", // Kullanıcı adı.
+    password: "", // Şifre.
+    confirmPassword: "", // Şifreyi doğrulamak için kullanılan alan.
+    gender: "", // Kullanıcının cinsiyetini tutar.
   });
 
-  const { loading, signup } = useSignup(); //Kayıt işlemi ve yükleme durumu
+  const { loading, signup } = useSignup(); // useSignup hook'undan loading durumu ve signup fonksiyonu alınır.
 
   const handleCheckboxChange = (gender) => {
-    //Cinsiyet seçildiğinde state güncelleniyor
+    // Cinsiyet seçimi değiştiğinde state güncellenir.
     setInputs({ ...inputs, gender });
   };
 
   const handleSubmit = async (e) => {
-    //Form gönderildiğinde çalışacak fonksiyon
-    e.preventDefault(); //Sayfanın yenilenmesini engeller
-    await signup(inputs); //Kayıt fonksiyonunu çağırı ve from verrilerini gönderir
+    // Form gönderildiğinde bu fonksiyon çalışır.
+    e.preventDefault(); // Sayfanın yenilenmesini engeller.
+    await signup(inputs); // Kullanıcı verileri ile signup fonksiyonu çağrılır.
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
-      <div className="w-full p-6 rounded-lg shadow-md bg-gray-500 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
-        <h1 className="text-3xl font-semibold text-center text-gray-300 ">
-          Sign Up <span className="text-blue-500">ChatApp-V2</span>
+      {" "}
+      {/* Formun genel düzeni için kullanılan flexbox yapısı */}
+      <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
+        {" "}
+        {/* Form kutusunun stilini belirler */}
+        <h1 className="text-3xl font-semibold text-center text-gray-300">
+          {" "}
+          {/* Başlık kısmı */}
+          Sign Up <span className="text-blue-500"> ChatApp</span>{" "}
+          {/* ChatApp ismiyle stil verilmiş başlık */}
         </h1>
         <form onSubmit={handleSubmit}>
           {" "}
-          {/*Form gönderildiğinde handleSubmit çalışacak */}
+          {/* Form submit işlemi için onSubmit event handler */}
           <div>
             <label className="label p-2">
-              <span className="text-base label-text">Full Name</span>
+              {" "}
+              {/* Etiket kısmı */}
+              <span className="text-base label-text">Full Name</span>{" "}
+              {/* Tam isim etiketi */}
             </label>
             <input
-              type="text"
-              placeholder="Kasım Kurtay"
-              className="w-full input input-bordered h-10"
-              value={inputs.fullName} //State'ten alınan değer input'ta gösterilir
-              onChange={
-                (e) => setInputs({ ...inputs, fullName: e.target.value }) //Input değiştiğinde state güncellenir
-              }
+              type="text" // Kullanıcı adı için metin giriş alanı
+              placeholder="John Doe" // Placeholder metni
+              className="w-full input input-bordered  h-10" // Tailwind ile stil verilmiş
+              value={inputs.fullName} // State'deki fullName değeri
+              onChange={(e) =>
+                setInputs({ ...inputs, fullName: e.target.value })
+              } // Input değiştiğinde state güncellenir
             />
           </div>
           <div>
-            <label className="label p-2">
-              <span className="text-base label-text">Username</span>
+            <label className="label p-2 ">
+              <span className="text-base label-text">Username</span>{" "}
+              {/* Kullanıcı adı etiketi */}
             </label>
             <input
-              type="text"
-              placeholder="KasiMKurtay"
-              className="w-full input input-bordered h-10"
-              value={inputs.username}
+              type="text" // Kullanıcı adı için metin giriş alanı
+              placeholder="johndoe" // Placeholder metni
+              className="w-full input input-bordered h-10" // Tailwind ile stil verilmiş
+              value={inputs.username} // State'deki username değeri
               onChange={(e) =>
                 setInputs({ ...inputs, username: e.target.value })
-              }
+              } // Input değiştiğinde state güncellenir
             />
           </div>
           <div>
             <label className="label">
-              <span className="text-base label-text">Password</span>
+              <span className="text-base label-text">Password</span>{" "}
+              {/* Şifre etiketi */}
             </label>
             <input
-              type="password"
-              placeholder="Enter Password"
-              className="w-full input input-bordered h-10"
-              value={inputs.password}
+              type="password" // Şifre girişi için input türü
+              placeholder="Enter Password" // Placeholder metni
+              className="w-full input input-bordered h-10" // Tailwind ile stil verilmiş
+              value={inputs.password} // State'deki password değeri
               onChange={(e) =>
                 setInputs({ ...inputs, password: e.target.value })
-              }
+              } // Input değiştiğinde state güncellenir
             />
           </div>
           <div>
             <label className="label">
-              <span className="text-base label-text">Confirm Password</span>
+              <span className="text-base label-text">Confirm Password</span>{" "}
+              {/* Şifreyi doğrulama etiketi */}
             </label>
             <input
-              type="password"
-              placeholder="Confirm Password"
-              className="w-full input input-bordered h-10"
-              value={inputs.confirmPassword}
+              type="password" // Şifreyi doğrulamak için input türü
+              placeholder="Confirm Password" // Placeholder metni
+              className="w-full input input-bordered h-10" // Tailwind ile stil verilmiş
+              value={inputs.confirmPassword} // State'deki confirmPassword değeri
               onChange={(e) =>
                 setInputs({ ...inputs, confirmPassword: e.target.value })
-              }
+              } // Input değiştiğinde state güncellenir
             />
           </div>
           <GenderCheckbox
-            onCheckboxChange={handleCheckboxChange} //Cinsiyet seçildiğinde çalışacak input
-            selectedGender={inputs.gender} //Seçilen cinsiyet input
-          />
+            onCheckboxChange={handleCheckboxChange}
+            selectedGender={inputs.gender}
+          />{" "}
+          {/* Cinsiyet seçim kutusunu ekler */}
           <Link
-            to={"/login"}
+            to={"/login"} // Giriş sayfasına yönlendiren Link bileşeni
             className="text-sm hover:underline hover:text-blue-600 mt-2 inline-block"
           >
-            Already have an account?
+            Already have an account? {/* Giriş yapma bağlantısı */}
           </Link>
           <div>
             <button
               className="btn btn-block btn-sm mt-2 border border-slate-700"
-              disabled={loading} //Yükleme varsa butona tıklanmaz
+              disabled={loading}
             >
-              {loading ? ( //Eğer yükleme varsa spinner göster
+              {" "}
+              {/* Buton, loading durumu kontrolüyle devre dışı bırakılabilir */}
+              {loading ? (
                 <span className="loading loading-spinner"></span>
               ) : (
-                "Sign Up" //Yoksa metni göster
-              )}
+                "Sign Up"
+              )}{" "}
+              {/* Yükleniyor durumu gösterilir */}
             </button>
           </div>
         </form>
@@ -119,5 +134,4 @@ const SignUp = () => {
     </div>
   );
 };
-
 export default SignUp;

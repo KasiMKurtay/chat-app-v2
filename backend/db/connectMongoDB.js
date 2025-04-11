@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const connectMongoDB = async() => {//asenkron bir fonksiyon tanımlıyoruz
+const connectToMongoDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI)//MongoDB veritabanına bağlanır. Bağlantı için proccess.env.MONGODB_URI değişkeni kullanılır
-    console.log("Connected to MongoDB");//Bağlantı başarılı olduğunda bu mesaj yazar
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to MongoDB");
   } catch (error) {
     console.log("Error connecting to MongoDB", error.message);
   }
-}
+};
 
-export default connectMongoDB
+export default connectToMongoDB;

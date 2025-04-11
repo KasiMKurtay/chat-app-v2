@@ -1,44 +1,45 @@
-import jwt from "jsonwebtoken";//Bu modül, (JWT) oluşturma ve doğrulama işlemi için kullanılır
-import User from "../models/user.model.js";//Kullanıcı modellerini içeren dosyayı buraya dahil eder
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
-const protectRoute = async (req, res, next) => {//Bu fonksiyon rotalara gelen istekleri işlemeden önce kimlik doğrulaması yapar
+const protectRoute = async (req, res, next) => {
+  // Middleware fonksiyonu, kimlik doğrulama işlemi yapar
   try {
-    const token = req.cookies.jwt; //İstekteki çerezden JWT token'i alır, kullanıcı giriş yaptığında çerez olarak kaydedilir
-    if (!token) { //Eğer token yoksa hata mesajı döndürüyoruz
+    const token = req.cookies.jwt; // Çerezden token alınır
+    if (!token) {
+      // Eğer token yoksa, kullanıcının kimliği doğrulanamaz
       return res
         .status(401)
-        .json({ error: "Unauthorized - No token provided" });
-    }
-    //Eğer Token varsa işlem devam ediyor
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);//Token'ı JWT_SECRET kullanarak doğrular.Eğer Token geçerliyse, içindeki bilgiler(payload) çözülür(decode edilir).
-
-    if (!decoded) {//Eğer token doğrulanmazsa hata mesajı döner
-      return res
-        .status(401)
-        .json({ error: "Unauthorized - No token provided" });
+        .json({ error: "Unauthorized - No token provided" }); // Hata döner, token bulunamadı
     }
 
-    const user = await User.findById(decoded.userId).select("-password");
-    //decoded.userId: Token içindeki ID'yi alır
-    //User.findById: Veritabanından bu kimliğe sahip kullanıcıyı arar.
-    //.select("-password") şifre hariç tüm kullanıcı bilgilerini getirir
-
-    if (!user) {//Eğer kullanıcı bulunamazsa hata mesajı döner
-      return res.status(404).json({ error: "User not found" });
+    let decoded; // Token'ı decode edilmiş hali
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET); // Token'ı doğrular, JWT_SECRET ile doğrulama yapılır
+    } catch (error) {
+      // Eğer token geçerli değilse veya süresi dolmuşsa hata yakalanır
+      if (error.name === "TokenExpiredError") {
+        // Token süresi dolmuşsa
+        return res
+          .status(401)
+          .json({ error: "Unauthorized - Token has expired" }); // Hata döner, token süresi dolmuş
+      }
+      return res.status(401).json({ error: "Unauthorized - Invalid token" }); // Hata döner, geçersiz token
     }
 
-    req.user = user; //Kimlik doğrılama başarılıysa kullanıcı bilgilerini req.user nesnesine ekler sonraki middleware veya rotalarda kullanıcı bilgilerine erişimi kolaylaştırır
+    const user = await User.findById(decoded.userId).select("-password"); // Token içindeki userId ile kullanıcıyı veritabanından bulur
+    if (!user) {
+      // Eğer kullanıcı bulunmazsa
+      return res.status(404).json({ error: "User not found" }); // Kullanıcı bulunamadı hatası döner
+    }
 
-    next(); //İşlemi bir sonraki middleware veya rotaya devam ettirir
+    req.user = user; // Kullanıcı bilgilerini request nesnesine ekler, sonraki middleware veya route'larda kullanılabilir
+
+    next(); // İşlemi bir sonraki middleware veya route'a yönlendirir
   } catch (error) {
-    console.log("Error in protectRoute middleware:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    // Genel hata yakalama
+    console.log("Error in protectRoute middleware:", error.message); // Hata mesajını loglar
+    res.status(500).json({ error: "Internal Server Error" }); // Sunucu hatası döner
   }
 };
 
 export default protectRoute;
-
-//1- İstekteki JWT token'ı kontrol eder
-//2-Token'ı doğrular ve içindeki ID'yi alır
-//3-Veritabanından kullanıcıyı bulur ve şifre hariç req.user nesnesine ekler
-//4- Kimlik doğrulama başarılıysa işlemi bir sonraki rotaya devam ettirir

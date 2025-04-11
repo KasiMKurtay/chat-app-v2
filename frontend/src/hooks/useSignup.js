@@ -1,15 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuthContext } from "../context/AuthContext";
 
 const useSignup = () => {
   const [loading, setLoading] = useState(false);
-  //Yüklenme durumunu kontrol eder form gönderilirken true olur
-  const { authUser, setAuthUser } = useAuthContext();
-  //Kullanıcı bilgisine erişir giriş yapınca bu güncellenir
+  const { setAuthUser } = useAuthContext();
 
+  // signup fonksiyonu, kullanıcı kaydı için gerekli işlemleri yapacak
   const signup = async ({
-    //Parametere olarak tüm from verilerini alıyor
     fullName,
     username,
     password,
@@ -17,87 +15,72 @@ const useSignup = () => {
     gender,
   }) => {
     const success = handleInputErrors({
-      //form verileri eksik mi şifreler uyuşuyor mu gibiş kontroller yapılıur varsa hata toast.error ile gösterilir devam edilmez
       fullName,
       username,
       password,
       confirmPassword,
       gender,
-    });
-    if (!success) return;
+    }); // Giriş verilerinin doğruluğunu kontrol ediyoruz
+    if (!success) return; // Eğer doğrulama başarısızsa işlem duruyor
 
-    setLoading(true);
-    //İşlem başladığı için loading durumu true olur
+    setLoading(true); // Yükleniyor durumuna geçiyoruz
     try {
       const res = await fetch("/api/auth/signup", {
-        //fetch ile sunucuya istek atıyoruz
-        method: "POST", //veri gönderiyoruz
-        headers: { "Content-Type": "application/json" }, //JSON formatında yollayağımızı belirtiyoruz
+        // Backend'e yeni kullanıcıyı kaydetmek için POST isteği gönderiyoruz
+        method: "POST", // POST metodunu kullanıyoruz
+        headers: { "Content-Type": "application/json" }, // JSON formatında veri gönderdiğimizi belirtiyoruz
         body: JSON.stringify({
-          //Formdan gelen verileri JSON'a çevirip gönderiyoruz
           fullName,
           username,
           password,
           confirmPassword,
           gender,
-        }),
+        }), // Kullanıcı verilerini JSON formatında gönderiyoruz
       });
 
-      const data = await res.json(); //Sunucu cevap verir biz bu cevabı alırız.
-
+      const data = await res.json(); // API'den gelen yanıtı JSON formatında alıyoruz
       if (data.error) {
-        throw new Error(data.error);
+        throw new Error(data.error); // Eğer bir hata varsa, hata fırlatıyoruz
       }
-      localStorage.setItem("chat-user", JSON.stringify(data));
-      //Kayıt başarılı ise, kullanıcı bilgilerini localStorage'a kaydediyoruz
-      //Böylece sayfa yenilendiğinde bile kullanıcı bilgileri korunur
-
-      setAuthUser(data);
-      //Context'teki authUser bilgilerini güncelliyoruz
-      //Uygulama genelinde kullanıcı giriş yapmış olur
-      if (res.ok) {
-        toast.success("Signup successful!");
-        //Eğer kayıt işlemi başarılıysa (res.ok true) > yeşil bildirim
-      } else {
-        toast.error(data.message || "Signup failed"); //değilse kırmızı bildirim
-      }
+      localStorage.setItem("chat-user", JSON.stringify(data)); // Kullanıcı verilerini localStorage'a kaydediyoruz
+      setAuthUser(data); // Kullanıcıyı auth context'e set ediyoruz
     } catch (error) {
-      toast.error(error.message); //fetch sırasında hata olursa, buraya düşeriz
+      toast.error(error.message); // Hata durumunda toast ile hata mesajı gösteriyoruz
     } finally {
-      setLoading(false); //İşlem bittiğinde (başarılı ya da hatalı),loading tekrar false yapılır
+      setLoading(false); // İşlem bitince loading durumunu false yapıyoruz
     }
   };
 
-  return { loading, signup };
-  //loading: Buton durumu için
-  //Signup : Form gönderme işlemi için
+  return { loading, signup }; // signup fonksiyonunu ve loading durumunu dışa aktarıyoruz
 };
 
-export default useSignup;
+export default useSignup; // useSignup hook'unu dışa aktarıyoruz
 
+// Kullanıcı giriş verilerini kontrol etmek için yardımcı bir fonksiyon
 function handleInputErrors({
-  //Input verilerini kontrol eder
   fullName,
   username,
   password,
   confirmPassword,
   gender,
 }) {
-  //Eğer herhangi bir alan boşsa kullancıya hata gösterilir
   if (!fullName || !username || !password || !confirmPassword || !gender) {
-    toast.error("Please fill in all fields");
+    // Gerekli alanların doldurulup doldurulmadığını kontrol ediyoruz
+    toast.error("Please fill in all fields"); // Eğer bir alan eksikse hata mesajı gösteriyoruz
     return false;
-    //Fonksiyon false döner
   }
+
   if (password !== confirmPassword) {
-    //Şifreler eşleşmiyosa hata verilir
-    toast.error("Passwords do not match");
-    return false; //İşlem durur
+    // Şifre ile onay şifresinin eşleşip eşleşmediğini kontrol ediyoruz
+    toast.error("Passwords do not match"); // Şifreler uyuşmazsa hata mesajı gösteriyoruz
+    return false;
   }
+
   if (password.length < 6) {
-    //Şifre 6 karakterden kısaysa hata verir
-    toast.error("Password must be at least 6 characters");
-    return false; //İşlem durur
+    // Şifrenin en az 6 karakter uzunluğunda olup olmadığını kontrol ediyoruz
+    toast.error("Password must be at least 6 characters"); // Şifre kısa ise hata mesajı gösteriyoruz
+    return false;
   }
-  return true; //Eğer her şey doğruysa true döner
+
+  return true; // Eğer tüm doğrulamalar başarılıysa true döndürüyoruz
 }

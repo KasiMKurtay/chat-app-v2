@@ -1,23 +1,16 @@
-import React from "react";
-import Sidebar from "../../components/sidebar/Sidebar";
 import MessageContainer from "../../components/messages/MessageContainer";
+import Sidebar from "../../components/sidebar/Sidebar";
 
 const Home = () => {
+  // Home bileşeni, ana sayfa bileşenidir
   return (
-    <div className="flex sm:h-[450px] md:h-[550px] rounded-lg overflow-hidden  bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
-      {/*yatayda sırala 
-      sm:h-[450px] küçük ekranlarda yükseklik 450px
-      md:h-[550px] orta ekranlarda 550px
-      rounded-lg:kenarlar oval
-      overflow-hidden:taşan içerik gizlenir
-      bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0 : arka planı bulaklaştırmna efekti
-      */}
-      <Sidebar />
-      {/*Sol tarafta sidebar */}
-      <MessageContainer />
-      {/*Sağda aktif sohbet mesajlar */}
+    <div className="flex sm:h-[450px] md:h-[550px] rounded-lg overflow-hidden bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
+      {/* Ana container div'ini tanımlıyoruz. flex ile çocuk bileşenlerini yan yana yerleştiriyoruz.
+				Responsive tasarım için sm ve md breakpoint'lerinde yükseklik değerini değiştiriyoruz. 
+				Bu div, hem arka plan rengini hem de blurlama efektini içeriyor. */}
+      <Sidebar /> {/* Sidebar bileşenini yerleştiriyoruz */}
+      <MessageContainer /> {/* Mesajları gösteren bileşeni yerleştiriyoruz */}
     </div>
   );
 };
-
 export default Home;

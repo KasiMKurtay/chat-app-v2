@@ -1,68 +1,74 @@
-import Conversation from "../models/conversation.model.js";
-import Message from "../models/message.model.js";
+import Conversation from "../models/conversation.model.js"; 
+import Message from "../models/message.model.js"; 
+import { getReceiverSocketId, io } from "../socket/socket.js"; 
 
+// Yeni mesaj gönderme işlemi
 export const sendMessage = async (req, res) => {
   try {
-    const { message } = req.body; //HTTP isteği ile gönderilen verileri tutar. Kullanıcının gönderdiği mesajı vbu veriden alır ve message değişkenine atar
-    const { id: receiverId } = req.params; //URL'de tanımlı olan id'yi alır ve onu receiverID olarak yeniden adlandırarak değişkene atar, Alıcıya ait ID burada alnır
-    const senderId = req.user._id; //Aktif olan kullanıcıya ait bilgileri içerir yani mesajı gönderen kişinin ID'si buradan alınır
+    const { message } = req.body; // İstek gövdesinden mesaj içeriğini alır
+    const { id: receiverId } = req.params; // URL parametresinden alıcı ID'sini alır
+    const senderId = req.user._id; // Giriş yapan kullanıcının ID'sini alır
 
-    //Conversation.findOne : veritabanında, gönderen ve alıcının katılımcı olduğu sohbet arar
+    // Bu iki kullanıcı arasında daha önce konuşma var mı diye kontrol eder
     let conversation = await Conversation.findOne({
-      //participants: { $all: [senderId, receiverId] }: Hem gönderen hem de alıcının katılımcı olduğu sohbeti bulur
-      participants: { $all: [senderId, receiverId] },
+      participants: { $all: [senderId, receiverId] }, // Her iki kullanıcı da bu konuşmada olmalı
     });
 
-    //Eğer böyle bir sohbet yoksa yeni bir sohbet oluşturur
+    // Eğer konuşma yoksa yeni bir konuşma oluşturur
     if (!conversation) {
-      //Yeni bir sohbet belgesi oluşturur ve veritabanına kaydeder
       conversation = await Conversation.create({
-        //Gönderen ve alıcıyı katılımcı olarak ekler
         participants: [senderId, receiverId],
       });
     }
 
-    //Yeni bir mesaj belgesi oluşturur, Bu belge, (senderId) , (receiverId) ve message içeriğini içerir
+    // Yeni bir mesaj nesnesi oluşturur
     const newMessage = new Message({
       senderId,
       receiverId,
       message,
     });
 
-    //Eğer yeni mesaj başarıyla oluşturulduysa bu mesajın kimliğini messages kısmına ekler
+    // Eğer mesaj başarılı şekilde oluşturulduysa, mesajı konuşmaya ekler
     if (newMessage) {
       conversation.messages.push(newMessage._id);
     }
 
-    // Altta bulunan iki kod aynı anda çalışmaz çünkü üstten aşşağı doğru okur
-    //await conversation.save();
-    //await newMessage.save();
-
-    // Ama bu kod yapısı aynı anda çalışır
+    // Hem konuşmayı hem mesajı aynı anda kaydeder (performans için paralel)
     await Promise.all([conversation.save(), newMessage.save()]);
+
+    // SOCKET.IO kullanarak mesajı gerçek zamanlı alıcıya gönder
+    const receiverSocketId = getReceiverSocketId(receiverId); // Alıcının socket.id'sini alır
+    if (receiverSocketId) {
+      // Eğer alıcı online ise ona yeni mesajı gönder
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+
+    // Frontend'e yeni mesajı döner
+    res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sendMessage controller", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.log("Error in sendMessage controller: ", error.message); // Hata logu
+    res.status(500).json({ error: "Internal server error" }); // Hata durumunda mesaj döner
   }
 };
+
+// İki kullanıcı arasındaki tüm mesajları getirir
 export const getMessages = async (req, res) => {
   try {
-    const { id: userToChatId } = req.params;
-    const senderId = req.user._id;
+    const { id: userToChatId } = req.params; // URL'den diğer kullanıcının ID'sini alır
+    const senderId = req.user._id; // Giriş yapan kullanıcının ID'si
 
+    // Bu iki kullanıcı arasındaki konuşmayı bulur ve içindeki mesajları da getirir
     const conversation = await Conversation.findOne({
       participants: { $all: [senderId, userToChatId] },
-    }).populate("messages");
+    }).populate("messages"); // Referans değil gerçek mesaj içerikleri gelsin diye populate kullanılır
 
-    res.status(200).json(conversation.messages);
+    if (!conversation) return res.status(200).json([]); // Konuşma yoksa boş dizi döner
 
-    if (!conversation) return res.status(200).json([]);
+    const messages = conversation.messages; // Mesajlar alınır
 
-    const messages = conversation.messages;
-
-    res.status(200).json(messages);
+    res.status(200).json(messages); // Mesajları frontend'e gönderir
   } catch (error) {
-    console.log("Error in sendMessage controller:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.log("Error in getMessages controller: ", error.message); // Hata logu
+    res.status(500).json({ error: "Internal server error" }); // Sunucu hatası döner
   }
 };
